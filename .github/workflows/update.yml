@@ -1,0 +1,62 @@
+name: Actualización mensual de la guía de viajes
+
+on:
+  # Día 1 de cada mes a las 05:00 UTC
+  schedule:
+    - cron: "0 5 1 * *"
+  # Permite lanzarlo manualmente desde la pestaña Actions
+  workflow_dispatch:
+  # Regenera también al hacer push de cambios en el código/datos
+  push:
+    branches:
+      - main
+      - claude/europe-travel-budget-link-5va3lf
+    paths:
+      - "generate.py"
+      - "data/**"
+      - ".github/workflows/update.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Evita despliegues solapados; deja terminar el que esté en curso
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generar index.html del mes actual
+        run: python generate.py
+
+      - name: Preparar artefacto del sitio
+        run: |
+          mkdir -p _site
+          cp index.html _site/index.html
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir artefacto
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
