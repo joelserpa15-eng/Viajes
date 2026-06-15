@@ -3,9 +3,12 @@
 Catálogo de destinos europeos coste-efectivos desde España.
 
 Cada destino incluye:
+  - iata:        código IATA del aeropuerto de destino (para la API de vuelos).
+                 Si es None, no se consulta la API y se usa la estimación.
   - vuelo_base:  precio ORIENTATIVO de un vuelo ida y vuelta en temporada baja
-                 desde un aeropuerto principal de España (MAD/BCN), en euros.
-  - aerolinea:   compañía con la que suele salir más económico.
+                 desde Madrid (MAD), en euros. Sirve de RESPALDO si la API
+                 de precios reales no está disponible.
+  - aerolinea:   compañía con la que suele salir más económico (respaldo).
   - coste_dia:   gasto diario por persona con perfil "mochilero/económico"
                  (alojamiento en hostal o hotel económico + comidas +
                  transporte local + alguna actividad), en euros.
@@ -13,17 +16,17 @@ Cada destino incluye:
   - moneda:      moneda local (útil para saber si hay ventaja de cambio).
   - notas:       contexto sobre el destino.
 
-IMPORTANTE: los precios son estimaciones basadas en tarifas históricas de
-aerolíneas de bajo coste y costes de vida típicos. El generador aplica
-ajustes por temporada en cada actualización mensual. Para precios en vivo,
-ver README.md (integración opcional con una API de vuelos).
+Cuando hay credenciales de la API de vuelos configuradas (ver README), el
+generador sustituye 'vuelo_base' y 'aerolinea' por el PRECIO REAL más barato
+y la aerolínea correspondiente para las fechas del mes en curso.
 """
 
 DESTINOS = [
     {
         "nombre": "Lisboa",
         "pais": "Portugal",
-        "aeropuertos": "MAD/BCN → LIS",
+        "iata": "LIS",
+        "aeropuertos": "MAD → LIS",
         "vuelo_base": 45,
         "aerolinea": "Ryanair / TAP",
         "coste_dia": 60,
@@ -35,7 +38,8 @@ DESTINOS = [
     {
         "nombre": "Oporto",
         "pais": "Portugal",
-        "aeropuertos": "MAD/BCN → OPO",
+        "iata": "OPO",
+        "aeropuertos": "MAD → OPO",
         "vuelo_base": 40,
         "aerolinea": "Ryanair",
         "coste_dia": 55,
@@ -47,7 +51,8 @@ DESTINOS = [
     {
         "nombre": "Roma",
         "pais": "Italia",
-        "aeropuertos": "MAD/BCN → FCO/CIA",
+        "iata": "FCO",
+        "aeropuertos": "MAD → FCO",
         "vuelo_base": 55,
         "aerolinea": "Ryanair / Vueling",
         "coste_dia": 70,
@@ -59,7 +64,8 @@ DESTINOS = [
     {
         "nombre": "Nápoles",
         "pais": "Italia",
-        "aeropuertos": "MAD/BCN → NAP",
+        "iata": "NAP",
+        "aeropuertos": "MAD → NAP",
         "vuelo_base": 50,
         "aerolinea": "Ryanair",
         "coste_dia": 60,
@@ -71,7 +77,8 @@ DESTINOS = [
     {
         "nombre": "Budapest",
         "pais": "Hungría",
-        "aeropuertos": "MAD/BCN → BUD",
+        "iata": "BUD",
+        "aeropuertos": "MAD → BUD",
         "vuelo_base": 65,
         "aerolinea": "Ryanair / Wizz Air",
         "coste_dia": 45,
@@ -83,7 +90,8 @@ DESTINOS = [
     {
         "nombre": "Praga",
         "pais": "República Checa",
-        "aeropuertos": "MAD/BCN → PRG",
+        "iata": "PRG",
+        "aeropuertos": "MAD → PRG",
         "vuelo_base": 70,
         "aerolinea": "Ryanair / Vueling",
         "coste_dia": 50,
@@ -95,7 +103,8 @@ DESTINOS = [
     {
         "nombre": "Cracovia",
         "pais": "Polonia",
-        "aeropuertos": "MAD/BCN → KRK",
+        "iata": "KRK",
+        "aeropuertos": "MAD → KRK",
         "vuelo_base": 55,
         "aerolinea": "Ryanair / Wizz Air",
         "coste_dia": 40,
@@ -107,7 +116,8 @@ DESTINOS = [
     {
         "nombre": "Bucarest",
         "pais": "Rumanía",
-        "aeropuertos": "MAD/BCN → OTP",
+        "iata": "OTP",
+        "aeropuertos": "MAD → OTP",
         "vuelo_base": 45,
         "aerolinea": "Wizz Air / Ryanair",
         "coste_dia": 38,
@@ -119,7 +129,8 @@ DESTINOS = [
     {
         "nombre": "Sofía",
         "pais": "Bulgaria",
-        "aeropuertos": "MAD/BCN → SOF",
+        "iata": "SOF",
+        "aeropuertos": "MAD → SOF",
         "vuelo_base": 60,
         "aerolinea": "Wizz Air / Ryanair",
         "coste_dia": 38,
@@ -131,7 +142,8 @@ DESTINOS = [
     {
         "nombre": "Atenas",
         "pais": "Grecia",
-        "aeropuertos": "MAD/BCN → ATH",
+        "iata": "ATH",
+        "aeropuertos": "MAD → ATH",
         "vuelo_base": 90,
         "aerolinea": "Ryanair / Aegean",
         "coste_dia": 55,
@@ -143,7 +155,8 @@ DESTINOS = [
     {
         "nombre": "Split",
         "pais": "Croacia",
-        "aeropuertos": "MAD/BCN → SPU",
+        "iata": "SPU",
+        "aeropuertos": "MAD → SPU",
         "vuelo_base": 75,
         "aerolinea": "Ryanair / Vueling",
         "coste_dia": 60,
@@ -153,9 +166,10 @@ DESTINOS = [
                  "septiembre para esquivar la masificación de agosto.",
     },
     {
-        "nombre": "Cracovia/Varsovia y alrededores",
+        "nombre": "Varsovia",
         "pais": "Polonia",
-        "aeropuertos": "MAD/BCN → WAW",
+        "iata": "WAW",
+        "aeropuertos": "MAD → WAW",
         "vuelo_base": 60,
         "aerolinea": "Ryanair / Wizz Air",
         "coste_dia": 42,
@@ -166,7 +180,8 @@ DESTINOS = [
     {
         "nombre": "Tirana",
         "pais": "Albania",
-        "aeropuertos": "MAD/BCN → TIA",
+        "iata": "TIA",
+        "aeropuertos": "MAD → TIA",
         "vuelo_base": 70,
         "aerolinea": "Wizz Air",
         "coste_dia": 35,
@@ -178,7 +193,8 @@ DESTINOS = [
     {
         "nombre": "Valeta",
         "pais": "Malta",
-        "aeropuertos": "MAD/BCN → MLA",
+        "iata": "MLA",
+        "aeropuertos": "MAD → MLA",
         "vuelo_base": 65,
         "aerolinea": "Ryanair",
         "coste_dia": 60,
@@ -190,7 +206,8 @@ DESTINOS = [
     {
         "nombre": "Edimburgo",
         "pais": "Reino Unido",
-        "aeropuertos": "MAD/BCN → EDI",
+        "iata": "EDI",
+        "aeropuertos": "MAD → EDI",
         "vuelo_base": 60,
         "aerolinea": "Ryanair / easyJet",
         "coste_dia": 85,
@@ -200,15 +217,16 @@ DESTINOS = [
                  "Fringe (más ambiente, pero alojamiento más caro).",
     },
     {
-        "nombre": "Cracovia invernal / Centroeuropa",
-        "pais": "Varios",
-        "aeropuertos": "MAD/BCN → varios",
-        "vuelo_base": 55,
-        "aerolinea": "Ryanair / Wizz Air",
-        "coste_dia": 45,
-        "meses_ideales": [12, 1, 2],
-        "moneda": "Varias",
-        "notas": "En invierno, los mercados navideños y el bajo coste hacen de "
-                 "Centroeuropa la mejor opción calidad-precio.",
+        "nombre": "Viena",
+        "pais": "Austria",
+        "iata": "VIE",
+        "aeropuertos": "MAD → VIE",
+        "vuelo_base": 70,
+        "aerolinea": "Ryanair / Vueling",
+        "coste_dia": 75,
+        "meses_ideales": [4, 5, 6, 9, 10, 12],
+        "moneda": "EUR",
+        "notas": "Elegante y muy bien conectada. En diciembre, de los mejores "
+                 "mercados navideños de Europa.",
     },
 ]

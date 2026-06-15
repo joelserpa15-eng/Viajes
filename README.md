@@ -38,7 +38,8 @@ Ese enlace siempre mostrará la guía del mes en curso, sin que tengas que hacer
 
 | Archivo | Función |
 |---|---|
-| `data/destinos.py` | Catálogo de destinos con precios base, aerolíneas y estacionalidad. |
+| `data/destinos.py` | Catálogo de destinos con códigos IATA, precios base, aerolíneas y estacionalidad. |
+| `flights.py` | Cliente de la API de Amadeus (precios reales) con respaldo a estimaciones. |
 | `generate.py` | Genera `index.html` para el mes actual (ranking, presupuestos, eventos). |
 | `index.html` | Página publicada (regenerada cada mes). |
 | `.github/workflows/update.yml` | Automatización mensual + despliegue en Pages. |
@@ -54,18 +55,43 @@ Abre `index.html` en el navegador.
 
 ## 💶 Sobre los precios
 
-Los importes son **estimaciones** basadas en tarifas históricas de aerolíneas de
-bajo coste (Ryanair, Vueling, Wizz Air, easyJet, TAP…) y costes de vida típicos.
-Sirven para **comparar destinos y planificar**, no como precio de compra. Verifica
-siempre el importe final en Skyscanner, Google Flights o Kiwi antes de reservar.
+- **Precios de vuelo:** si conectas la API de **Amadeus** (ver abajo), se usa el
+  precio **real** del vuelo ida y vuelta más barato desde Madrid (1 adulto, salida
+  ~3 semanas vista) y su aerolínea. Aparecen marcados como **🟢 real**. Si no hay
+  API conectada, se usan **estimaciones** (marcadas como **≈ estimado**).
+- **Gasto diario** (alojamiento + comidas + transporte + actividades): siempre es
+  una estimación por persona con perfil económico.
 
-### (Opcional) Precios de vuelos en vivo
+Verifica siempre el importe final en Skyscanner, Google Flights o Kiwi antes de reservar.
 
-`generate.py` está preparado para sustituir las estimaciones por precios reales si
-integras una API de vuelos (p. ej. **Skyscanner**, **Amadeus** o **Kiwi/Tequila**):
+## ✈️ Activar precios de vuelo REALES (Amadeus)
 
-1. Añade tu clave como *secret* del repositorio (**Settings → Secrets and variables
-   → Actions**), por ejemplo `FLIGHTS_API_KEY`.
-2. Expón el secret en el workflow (`env: FLIGHTS_API_KEY: ${{ secrets.FLIGHTS_API_KEY }}`).
-3. En `generate.py`, dentro de `precio_vuelo()`, llama a la API y usa el precio real;
-   si la llamada falla, se mantiene la estimación actual como respaldo.
+El proyecto ya está integrado con la API gratuita de **Amadeus Self-Service**.
+Solo tienes que darle tus credenciales:
+
+1. Crea una cuenta en <https://developers.amadeus.com> (gratis).
+2. En **My Self-Service Workspace → Create New App**, obtén tu **API Key** y **API Secret**.
+3. En GitHub, ve a **Settings → Secrets and variables → Actions → New repository secret**
+   y crea estos dos *secrets*:
+   - `AMADEUS_API_KEY`
+   - `AMADEUS_API_SECRET`
+4. (Opcional) Cuando pases de pruebas a datos de producción, crea una *variable*
+   (no secret) llamada `AMADEUS_ENV` con valor `production`. Por defecto se usa el
+   entorno `test`.
+
+A partir de ahí, la actualización mensual usará precios reales automáticamente.
+Si la API falla o agota la cuota, la web sigue funcionando con las estimaciones
+de respaldo (nunca se rompe).
+
+> **Entorno de pruebas (`test`):** los datos son reales pero limitados/cacheados y
+> con cuota mensual reducida. Para precios totalmente al día, usa `production`.
+
+### Probar la integración en local
+
+```bash
+export AMADEUS_API_KEY=tu_key
+export AMADEUS_API_SECRET=tu_secret
+python generate.py        # verás "[generate] Precios reales aplicados a N destinos"
+```
+
+Las respuestas se cachean 3 días en `_cache/` para no gastar cuota en re-ejecuciones.

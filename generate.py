@@ -17,9 +17,12 @@ Uso:
 
 import os
 import html
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from data.destinos import DESTINOS
+import flights
+
+ORIGEN = os.environ.get("ORIGEN_IATA", "MAD")
 
 DURACIONES = [5, 7, 10, 15, 20]
 
@@ -110,8 +113,50 @@ def estacion_de(mes: int) -> str:
     return ""
 
 
+def fechas_representativas() -> tuple[str, str]:
+    """Salida ~3 semanas vista, regreso 7 días después (formato YYYY-MM-DD)."""
+    salida = datetime.now(timezone.utc).date() + timedelta(days=21)
+    regreso = salida + timedelta(days=7)
+    return salida.isoformat(), regreso.isoformat()
+
+
+def enriquecer_con_precios_reales(destinos: list) -> bool:
+    """
+    Sustituye el precio del vuelo y la aerolínea por datos REALES de la API
+    cuando hay credenciales. Devuelve True si se usó al menos un precio real.
+    Si no hay credenciales o falla, cada destino conserva su estimación.
+    """
+    if not flights.credentials_present():
+        print("[generate] Sin credenciales Amadeus: se usan estimaciones.")
+        return False
+
+    dep, ret = fechas_representativas()
+    usados = 0
+    for d in destinos:
+        if not d.get("iata"):
+            continue
+        res = flights.search_roundtrip(ORIGEN, d["iata"], dep, ret)
+        if res:
+            d["_vuelo_real"] = res[0]
+            d["_aerolinea_real"] = res[1]
+            usados += 1
+    print(f"[generate] Precios reales aplicados a {usados} destinos "
+          f"(salida {dep}, regreso {ret}, origen {ORIGEN}).")
+    return usados > 0
+
+
 def precio_vuelo(dest: dict, mes: int) -> int:
+    if dest.get("_vuelo_real"):
+        return dest["_vuelo_real"]  # ya refleja la temporada (fechas reales)
     return round(dest["vuelo_base"] * MULT_VUELO_MES[mes])
+
+
+def aerolinea_de(dest: dict) -> str:
+    return dest.get("_aerolinea_real") or dest["aerolinea"]
+
+
+def es_precio_real(dest: dict) -> bool:
+    return bool(dest.get("_vuelo_real"))
 
 
 def coste_dia(dest: dict, mes: int) -> int:
@@ -149,6 +194,10 @@ def render(mes: int, anio: int) -> str:
     actualizado = datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M UTC")
     top = destinos[:3]
     eventos = EVENTOS_MES.get(mes, [])
+    hay_reales = any(es_precio_real(d) for d in destinos)
+    fuente = ("Precios de vuelo <strong>reales</strong> vía Amadeus"
+              if hay_reales else
+              "Precios de vuelo <strong>estimados</strong> (sin API conectada)")
 
     # --- Tarjetas de destino ---
     tarjetas = []
@@ -157,6 +206,7 @@ def render(mes: int, anio: int) -> str:
         vuelo = precio_vuelo(d, mes)
         dia = coste_dia(d, mes)
         ideal = "✅ Temporada ideal" if mes in d["meses_ideales"] else "🟡 Temporada media/baja"
+        etiqueta_precio = "🟢 real" if es_precio_real(d) else "≈ estimado"
         filas = "".join(
             f"<tr><td>{dias} días</td><td class='precio'>{fmt_eur(presu[dias])}</td></tr>"
             for dias in DURACIONES
@@ -170,8 +220,8 @@ def render(mes: int, anio: int) -> str:
           </header>
           <p class="ideal">{ideal} · {html.escape(estacion)}</p>
           <ul class="meta">
-            <li>✈️ <strong>Vuelo i/v:</strong> {fmt_eur(vuelo)} <span class="muted">({html.escape(d['aeropuertos'])})</span></li>
-            <li>🏷️ <strong>Más económico con:</strong> {html.escape(d['aerolinea'])}</li>
+            <li>✈️ <strong>Vuelo i/v:</strong> {fmt_eur(vuelo)} <span class="muted">({html.escape(d['aeropuertos'])}) · {etiqueta_precio}</span></li>
+            <li>🏷️ <strong>Más económico con:</strong> {html.escape(aerolinea_de(d))}</li>
             <li>💶 <strong>Gasto diario aprox.:</strong> {fmt_eur(dia)}/día · <span class="muted">Moneda: {html.escape(d['moneda'])}</span></li>
           </ul>
           <table class="presu">
@@ -246,6 +296,7 @@ def render(mes: int, anio: int) -> str:
     <span class="badge">Actualizado: {mes_nombre.capitalize()} {anio}</span>
     <h1>Destinos de Europa más coste-efectivos desde España</h1>
     <p class="sub">Presupuestos por persona para 5, 7, 10, 15 y 20 días · Temporada: {estacion} · Última generación: {actualizado}</p>
+    <p class="sub">{fuente} · Origen: {html.escape(ORIGEN)}</p>
   </header>
 
   <section class="panel top">
@@ -265,10 +316,12 @@ def render(mes: int, anio: int) -> str:
   </div>
 
   <footer>
-    <p>Los precios son <strong>estimaciones</strong> basadas en tarifas históricas de aerolíneas
-    de bajo coste (Ryanair, Vueling, Wizz Air, easyJet…) y costes de vida típicos por persona
-    con perfil económico. Verifica siempre el precio final en buscadores como Skyscanner, Google
-    Flights o Kiwi antes de reservar.</p>
+    <p>Los <strong>precios de vuelo</strong> marcados como 🟢 real proceden de la API de Amadeus
+    (vuelo i/v más barato, 1 adulto, ~3 semanas vista); los marcados como ≈ estimado son
+    aproximaciones basadas en tarifas históricas de aerolíneas de bajo coste. El <strong>gasto
+    diario</strong> (alojamiento + comidas + transporte + actividades) es siempre una estimación
+    por persona con perfil económico. Verifica el precio final en Skyscanner, Google Flights o
+    Kiwi antes de reservar.</p>
     <p>Esta página se regenera automáticamente el día 1 de cada mes.</p>
   </footer>
 </div>
@@ -281,6 +334,7 @@ def main():
     now = datetime.now(timezone.utc)
     mes = int(force) if force else now.month
     anio = now.year
+    enriquecer_con_precios_reales(DESTINOS)
     pagina = render(mes, anio)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(pagina)
