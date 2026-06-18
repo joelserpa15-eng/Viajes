@@ -1,17 +1,19 @@
 # 🌍 Viajes — Destinos de Europa más coste-efectivos desde España
 
-Sitio web que se **actualiza automáticamente el día 1 de cada mes** con los
-destinos de viaje europeos con mejor relación calidad-precio para alguien que
-vive en España. Para cada destino se muestran:
+Sitio web que se **actualiza automáticamente el día 1 de cada mes** con la
+planificación de los **próximos 12 meses**, organizada en **acordeones por mes**.
+Para cada mes y cada destino europeo con mejor relación calidad-precio para
+alguien que vive en España se muestran:
 
 - **Presupuesto total por persona** para viajes de **5, 7, 10, 15 y 20 días**.
-- **Precio orientativo del vuelo** ida y vuelta y la **aerolínea más económica**.
+- **Precio del vuelo** ida y vuelta (real vía Amadeus, o estimado) y la **aerolínea más económica**.
 - **Gasto diario estimado** (alojamiento económico + comidas + transporte + actividades).
 - **Recomendaciones de temporada** y **avisos de descuentos/eventos** del mes.
 
-El ranking se recalcula cada mes teniendo en cuenta la **estación** (precios de
-vuelo y alojamiento suben en verano y Navidad, bajan en primavera/otoño) y el
-clima ideal de cada destino.
+El ranking se recalcula para **cada uno de los 12 meses** teniendo en cuenta la
+**estación** (precios de vuelo y alojamiento suben en verano y Navidad, bajan en
+primavera/otoño) y el clima ideal de cada destino. Cada mes es un acordeón
+plegable (el primero aparece abierto), y hay botones para expandir/contraer todos.
 
 ## 🔗 El enlace que se actualiza solo
 
@@ -21,7 +23,8 @@ Una vez activado GitHub Pages (ver abajo), el enlace público será:
 https://joelserpa15-eng.github.io/Viajes/
 ```
 
-Ese enlace siempre mostrará la guía del mes en curso, sin que tengas que hacer nada.
+Ese enlace siempre mostrará la planificación de los 12 meses siguientes, avanzando
+la ventana cada mes sin que tengas que hacer nada.
 
 ## ⚙️ Cómo activar la actualización automática (una sola vez)
 
@@ -40,15 +43,15 @@ Ese enlace siempre mostrará la guía del mes en curso, sin que tengas que hacer
 |---|---|
 | `data/destinos.py` | Catálogo de destinos con códigos IATA, precios base, aerolíneas y estacionalidad. |
 | `flights.py` | Cliente de la API de Amadeus (precios reales) con respaldo a estimaciones. |
-| `generate.py` | Genera `index.html` para el mes actual (ranking, presupuestos, eventos). |
-| `index.html` | Página publicada (regenerada cada mes). |
+| `generate.py` | Genera `index.html` con los 12 meses en acordeones (ranking, presupuestos, eventos). |
+| `index.html` | Página publicada (regenerada cada mes, ventana móvil de 12 meses). |
 | `.github/workflows/update.yml` | Automatización mensual + despliegue en Pages. |
 
 ## 🧪 Probar en local
 
 ```bash
-python generate.py                 # genera index.html para el mes actual
-FORCE_MONTH=12 python generate.py  # fuerza un mes concreto (1-12) para ver la estacionalidad
+python generate.py                 # genera index.html (12 meses desde hoy)
+MESES_ADELANTE=6 python generate.py  # cambia el nº de meses de la ventana
 ```
 
 Abre `index.html` en el navegador.
