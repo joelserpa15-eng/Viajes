@@ -1,9 +1,10 @@
-# 🌍 Viajes — Destinos de Europa más coste-efectivos desde España
+# 🌍 Viajes — Destinos del mundo más coste-efectivos desde España
 
 Sitio web que se **actualiza automáticamente el día 1 de cada mes** con la
 planificación de los **próximos 12 meses**, organizada en **acordeones por mes**.
-Para cada mes y cada destino europeo con mejor relación calidad-precio para
-alguien que vive en España se muestran:
+Para cada mes y cada destino del mundo (Europa, Asia, África, Oriente Medio,
+América y Oceanía) con mejor relación calidad-precio para alguien que vive en
+España se muestran:
 
 - **Presupuesto total por persona** para viajes de **5, 7, 10, 15 y 20 días**.
 - **Precio del vuelo** ida y vuelta (real vía Amadeus, o estimado) y la **aerolínea más económica**.

@@ -55,54 +55,60 @@ MULT_DIA_MES = {
 # Eventos / descuentos recurrentes destacables por mes (texto informativo).
 EVENTOS_MES = {
     1: [
-        "Rebajas de invierno en aerolíneas: enero suele traer las tarifas "
-        "más bajas del año para volar en primavera. Buen momento para reservar con antelación.",
-        "Esquí asequible en Bansko (Bulgaria) y los Tatras (Polonia/Eslovaquia).",
+        "Rebajas de invierno en aerolíneas: enero suele traer las tarifas más bajas "
+        "del año para volar en primavera. Buen momento para reservar con antelación.",
+        "Pleno apogeo de la estación seca en el Sudeste Asiático (Tailandia, Vietnam, "
+        "Camboya) y en el Caribe: clima ideal, pero reserva pronto.",
     ],
     2: [
-        "Carnaval: Venecia, Niza o Colonia disparan precios puntuales; "
+        "Carnaval por el mundo (Río de Janeiro, Venecia, Tenerife): precios disparados; "
         "reserva con mucha antelación o evita esas fechas.",
-        "Sigue siendo temporada baja: vuelos a Centroeuropa muy económicos.",
+        "Sigue siendo temporada baja en Europa y verano austral en Sudáfrica y Argentina.",
     ],
     3: [
-        "Arranca la temporada media: precios aún contenidos y buen clima en el sur de Europa.",
-        "Semana Santa puede encarecer vuelos; compra con antelación si viajas en esas fechas.",
+        "Arranca la temporada media en Europa, con precios aún contenidos.",
+        "Mes ideal para Egipto, Jordania y Marruecos antes del calor; también para India y Nepal.",
     ],
     4: [
-        "Primavera plena: mejor relación clima/precio del año en Portugal, Italia y Grecia.",
-        "Atención a la Semana Santa: picos de precio en torno a las fechas festivas.",
+        "Primavera plena en Europa: mejor relación clima/precio del año.",
+        "Cerezos en Japón (vuelos caros) y comienzo de la estación seca en Bali. "
+        "Atención a la Semana Santa: picos de precio.",
     ],
     5: [
-        "Mayo es de los mejores meses: buen tiempo, menos masificación y precios moderados.",
-        "Croacia y Grecia aún en temporada media antes del pico veraniego.",
+        "Mayo es de los mejores meses en Europa: buen tiempo y precios moderados.",
+        "Empieza la estación seca andina (Perú, Bolivia): momento óptimo para Machu Picchu.",
     ],
     6: [
-        "Empieza el alza de verano. Reserva ya cualquier viaje de julio-agosto.",
-        "El Mediterráneo del Este (Albania, Grecia) ofrece mejor precio que España en costa.",
+        "Empieza el alza de verano en Europa. Reserva ya cualquier viaje de julio-agosto.",
+        "Arranca la temporada de safari en África Oriental (Kenia, Tanzania) y la "
+        "estación seca en Bali.",
     ],
     7: [
-        "Temporada alta: prioriza Europa del Este (Polonia, Rumanía, Bulgaria) para estirar el presupuesto.",
+        "Temporada alta en Europa: prioriza Europa del Este o vuela al Hemisferio Sur, "
+        "donde es temporada baja (Sudáfrica, Argentina) y los precios bajan.",
         "Reserva alojamiento con mucha antelación; los precios suben semana a semana.",
     ],
     8: [
-        "Pico de precios del año. Considera ciudades del norte/este menos saturadas.",
-        "Edimburgo vive el festival Fringe: mucho ambiente pero alojamiento caro.",
+        "Pico de precios del año para volar desde España. El invierno austral abarata "
+        "Ciudad del Cabo y Buenos Aires; el Sudeste Asiático está en temporada verde (más barato).",
+        "Considera ciudades menos saturadas o destinos de larga distancia.",
     ],
     9: [
-        "Vuelve la temporada media: septiembre es excelente: mar templado y precios a la baja.",
-        "Croacia, Grecia e Italia en su mejor momento calidad-precio tras el verano.",
+        "Vuelve la temporada media en Europa: septiembre es excelente, mar templado y precios a la baja.",
+        "Gran mes para safari en África Oriental y para Nueva York en otoño.",
     ],
     10: [
-        "Otoño: de los meses más baratos para volar y con clima agradable en el sur.",
-        "Malta y las islas mediterráneas siguen cálidas y a buen precio.",
+        "Otoño: de los meses más baratos para volar y con clima agradable en el sur de Europa.",
+        "Ideal para Marruecos, Egipto, India (post-monzón) y trekking en Nepal.",
     ],
     11: [
-        "Temporada baja: tarifas muy competitivas a casi toda Europa.",
-        "Empiezan a abrir los mercados navideños a finales de mes en Centroeuropa.",
+        "Temporada baja en Europa: tarifas muy competitivas.",
+        "Comienza la estación seca en el Sudeste Asiático, el Caribe y Dubái: clima inmejorable.",
     ],
     12: [
-        "Mercados navideños: Praga, Budapest, Viena y Cracovia, mágicos pero con demanda alta.",
-        "Vuela antes del 20 o después del 27 de diciembre para esquivar los picos de Navidad y Fin de Año.",
+        "Mercados navideños en Centroeuropa (Praga, Budapest, Viena): mágicos pero con demanda alta.",
+        "Plena temporada seca y cálida en el Sudeste Asiático, el Caribe y Ciudad del Cabo "
+        "(alta demanda: reserva con antelación). Vuela fuera de los picos de Navidad y Fin de Año.",
     ],
 }
 
@@ -311,8 +317,8 @@ def render_pagina(base_date: date, hay_reales: bool) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Planificador de los próximos 12 meses con los destinos de viaje más coste-efectivos de Europa desde España. Presupuestos para 5, 7, 10, 15 y 20 días, vuelos y aerolíneas más baratas, organizados por mes.">
-<title>Planificador de viajes a Europa — próximos 12 meses</title>
+<meta name="description" content="Planificador de los próximos 12 meses con los destinos de viaje más coste-efectivos del mundo desde España. Presupuestos para 5, 7, 10, 15 y 20 días, vuelos y aerolíneas más baratas, organizados por mes.">
+<title>Planificador de viajes por el mundo — próximos 12 meses</title>
 <style>
   :root {{
     --bg:#0f1724; --card:#16213a; --accent:#ffd166; --accent2:#06d6a0;
@@ -377,7 +383,7 @@ def render_pagina(base_date: date, hay_reales: bool) -> str:
 <div class="wrap">
   <header class="hero">
     <span class="badge">Planificación {desde} {periodos[0]['anio']} → {hasta}</span>
-    <h1>Planificador de viajes a Europa coste-efectivos desde España</h1>
+    <h1>Planificador de viajes por el mundo coste-efectivos desde España</h1>
     <p class="sub">Los próximos {MESES_ADELANTE} meses, mes a mes · Presupuestos por persona para 5, 7, 10, 15 y 20 días · Última actualización: {actualizado}</p>
     <p class="sub">{fuente} · Origen: {html.escape(ORIGEN)}</p>
   </header>
