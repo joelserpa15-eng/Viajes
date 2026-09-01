@@ -16,6 +16,13 @@ El ranking se recalcula para **cada uno de los 12 meses** teniendo en cuenta la
 primavera/otoño) y el clima ideal de cada destino. Cada mes es un acordeón
 plegable (el primero aparece abierto), y hay botones para expandir/contraer todos.
 
+Dentro de cada mes hay **dos subdivisiones**:
+
+- **🌍 Por el mundo:** destinos internacionales con vuelo i/v (real vía Amadeus o estimado).
+- **🇪🇸 Por España:** escapadas nacionales con los **mismos criterios** (ranking, presupuestos
+  por duración, mejores meses) más **cómo viajar mejor a cada sitio** (AVE, tren, autobús, vuelo
+  o ferry, con duración y trucos de ahorro). El transporte nacional usa estimaciones orientativas.
+
 ## 🔗 El enlace que se actualiza solo
 
 Una vez activado GitHub Pages (ver abajo), el enlace público será:

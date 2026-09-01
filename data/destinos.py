@@ -617,3 +617,271 @@ DESTINOS = [
                  "naturaleza. Vuelo largo, pero experiencia única.",
     },
 ]
+
+
+# =============================================================================
+# SUBDIVISIÓN: ESPAÑA
+# =============================================================================
+# Lugares que visitar dentro de España, con los MISMOS criterios coste-eficientes
+# que el resto del planeta, pero adaptados al viaje nacional:
+#   - transporte:        modo recomendado (AVE, tren, autobús, vuelo, ferry…).
+#   - coste_transporte:  precio ORIENTATIVO ida y vuelta desde Madrid, en euros.
+#   - coste_dia:         gasto diario por persona con perfil económico.
+#   - meses_ideales:     meses (1-12) con mejor relación clima/precio.
+#   - como_viajar:       la mejor forma de llegar (modo, duración y truco de ahorro).
+#   - notas:             qué ver / por qué merece la pena.
+# La moneda siempre es EUR, así que no se incluye ese campo.
+
+DESTINOS_ESPANA = [
+    {
+        "nombre": "Toledo",
+        "region": "Castilla-La Mancha",
+        "transporte": "Tren (Avant/AVE)",
+        "coste_transporte": 25,
+        "coste_dia": 55,
+        "meses_ideales": [3, 4, 5, 9, 10, 11],
+        "como_viajar": "Avant/AVE desde Madrid-Atocha en solo 33 min (i/v desde ~20 €); "
+                       "perfecta como excursión de un día o escapada de fin de semana.",
+        "notas": "Ciudad de las tres culturas, Patrimonio de la Humanidad. Catedral, "
+                 "Alcázar y casco medieval sobre el Tajo.",
+    },
+    {
+        "nombre": "Segovia",
+        "region": "Castilla y León",
+        "transporte": "Tren (Avant/AVE) o autobús",
+        "coste_transporte": 25,
+        "coste_dia": 55,
+        "meses_ideales": [3, 4, 5, 6, 9, 10],
+        "como_viajar": "AVE/Avant desde Madrid-Chamartín en 30 min (i/v desde ~25 €), o "
+                       "autobús directo (~1h15), aún más barato.",
+        "notas": "Acueducto romano, Alcázar de cuento y el mejor cochinillo. Ideal como "
+                 "escapada corta desde Madrid.",
+    },
+    {
+        "nombre": "Cuenca",
+        "region": "Castilla-La Mancha",
+        "transporte": "Tren (AVE)",
+        "coste_transporte": 40,
+        "coste_dia": 50,
+        "meses_ideales": [4, 5, 6, 9, 10],
+        "como_viajar": "AVE desde Madrid en menos de 1 h (i/v desde ~35 €); combina bien "
+                       "con naturaleza en la Serranía.",
+        "notas": "Casas Colgadas suspendidas sobre el barranco y casco antiguo Patrimonio "
+                 "de la Humanidad.",
+    },
+    {
+        "nombre": "Salamanca",
+        "region": "Castilla y León",
+        "transporte": "Tren o autobús",
+        "coste_transporte": 40,
+        "coste_dia": 50,
+        "meses_ideales": [4, 5, 6, 9, 10],
+        "como_viajar": "Tren desde Madrid-Chamartín en 1h40 o autobús Avanza; reserva Renfe "
+                       "con antelación para las tarifas más bajas.",
+        "notas": "La universidad más antigua de España y una Plaza Mayor espectacular. "
+                 "Ciudad joven y económica.",
+    },
+    {
+        "nombre": "Cáceres",
+        "region": "Extremadura",
+        "transporte": "Tren o autobús",
+        "coste_transporte": 45,
+        "coste_dia": 45,
+        "meses_ideales": [3, 4, 5, 10, 11],
+        "como_viajar": "Tren desde Madrid (~4h) o autobús directo; de los destinos más "
+                       "baratos de España para dormir y comer.",
+        "notas": "Casco medieval y renacentista Patrimonio de la Humanidad, casi intacto. "
+                 "Escenario de series y películas.",
+    },
+    {
+        "nombre": "Zaragoza",
+        "region": "Aragón",
+        "transporte": "Tren (AVE)",
+        "coste_transporte": 45,
+        "coste_dia": 50,
+        "meses_ideales": [4, 5, 6, 9, 10],
+        "como_viajar": "AVE en 1h15 (i/v desde ~40 €); parada perfecta a mitad de camino "
+                       "entre Madrid y Barcelona.",
+        "notas": "Basílica del Pilar, legado romano y mudéjar, y unas tapas excelentes en "
+                 "El Tubo.",
+    },
+    {
+        "nombre": "Valencia",
+        "region": "Comunidad Valenciana",
+        "transporte": "Tren (AVE/Avlo)",
+        "coste_transporte": 45,
+        "coste_dia": 55,
+        "meses_ideales": [3, 4, 5, 6, 9, 10],
+        "como_viajar": "AVE en 1h50; usa Avlo (low cost de Renfe) desde ~18 €/trayecto si "
+                       "reservas con antelación.",
+        "notas": "Ciudad de las Artes y las Ciencias, playa urbana, casco histórico y la "
+                 "paella original.",
+    },
+    {
+        "nombre": "Córdoba",
+        "region": "Andalucía",
+        "transporte": "Tren (AVE)",
+        "coste_transporte": 55,
+        "coste_dia": 55,
+        "meses_ideales": [3, 4, 5, 10, 11],
+        "como_viajar": "AVE en 1h45; ideal combinarla con Sevilla en el mismo viaje. Evita "
+                       "julio-agosto por el calor.",
+        "notas": "La Mezquita-Catedral, los patios y la judería. Primavera (Festival de los "
+                 "Patios en mayo) es su mejor momento.",
+    },
+    {
+        "nombre": "Sevilla",
+        "region": "Andalucía",
+        "transporte": "Tren (AVE/Avlo)",
+        "coste_transporte": 70,
+        "coste_dia": 60,
+        "meses_ideales": [3, 4, 5, 10, 11],
+        "como_viajar": "AVE desde Atocha en 2h30; con Avlo o comprando 1-2 meses antes hay "
+                       "trayectos desde ~35 €. Evita el calor del verano.",
+        "notas": "Catedral, Giralda, Alcázar y Plaza de España. Ambiente inigualable en "
+                 "primavera.",
+    },
+    {
+        "nombre": "Granada",
+        "region": "Andalucía",
+        "transporte": "Tren o autobús",
+        "coste_transporte": 60,
+        "coste_dia": 55,
+        "meses_ideales": [3, 4, 5, 10, 11],
+        "como_viajar": "Tren directo (~3h15) o autobús ALSA más económico (~4h30). Para la "
+                       "Alhambra, reserva entradas con semanas de antelación.",
+        "notas": "La Alhambra, el Albaicín y las tapas gratis con la bebida. Sierra Nevada "
+                 "a un paso para esquiar en invierno.",
+    },
+    {
+        "nombre": "Málaga",
+        "region": "Andalucía",
+        "transporte": "Tren (AVE) o vuelo",
+        "coste_transporte": 65,
+        "coste_dia": 60,
+        "meses_ideales": [4, 5, 6, 9, 10],
+        "como_viajar": "AVE en 2h40 o vuelo barato; base perfecta de la Costa del Sol y "
+                       "puerta a pueblos blancos.",
+        "notas": "Museos (Picasso, Pompidou), casco histórico renovado y playas. Clima "
+                 "suave casi todo el año.",
+    },
+    {
+        "nombre": "Cádiz",
+        "region": "Andalucía",
+        "transporte": "Tren (AVE/Alvia)",
+        "coste_transporte": 75,
+        "coste_dia": 55,
+        "meses_ideales": [5, 6, 9, 10],
+        "como_viajar": "AVE/Alvia en ~4h; una de las ciudades más antiguas de Europa con "
+                       "playas urbanas. Carnaval en febrero.",
+        "notas": "Casco antiguo entre el mar, atardeceres atlánticos y las mejores frituras "
+                 "de pescado.",
+    },
+    {
+        "nombre": "Barcelona",
+        "region": "Cataluña",
+        "transporte": "Tren (AVE/Ouigo/Iryo) o vuelo",
+        "coste_transporte": 70,
+        "coste_dia": 70,
+        "meses_ideales": [4, 5, 6, 9, 10],
+        "como_viajar": "AVE en 2h30; compara Renfe, Ouigo e Iryo (alta velocidad low cost) "
+                       "para bajar el precio, o vuela con el puente aéreo.",
+        "notas": "Sagrada Família, Gaudí, playa y gastronomía. Primavera y otoño evitan "
+                 "masificación y calor.",
+    },
+    {
+        "nombre": "Bilbao",
+        "region": "País Vasco",
+        "transporte": "Vuelo o tren",
+        "coste_transporte": 60,
+        "coste_dia": 65,
+        "meses_ideales": [5, 6, 7, 9, 10],
+        "como_viajar": "El vuelo directo (~1h) suele salir más barato que el tren (~4h); "
+                       "reserva pronto para tarifas bajas.",
+        "notas": "Museo Guggenheim, pintxos y ría regenerada. Base para la costa vasca.",
+    },
+    {
+        "nombre": "San Sebastián",
+        "region": "País Vasco",
+        "transporte": "Tren, autobús o vuelo a Bilbao",
+        "coste_transporte": 65,
+        "coste_dia": 70,
+        "meses_ideales": [5, 6, 7, 9, 10],
+        "como_viajar": "Tren o autobús ALSA (~5-6h) económicos, o vuela a Bilbao/Hondarribia "
+                       "y completa en bus (~1h).",
+        "notas": "La playa de La Concha y la mayor concentración de estrellas Michelin. "
+                 "Más caro, pero inolvidable.",
+    },
+    {
+        "nombre": "Santiago de Compostela",
+        "region": "Galicia",
+        "transporte": "Vuelo o tren (AVE)",
+        "coste_transporte": 65,
+        "coste_dia": 55,
+        "meses_ideales": [5, 6, 7, 8, 9],
+        "como_viajar": "Vuelo directo barato o AVE (~3h vía Ourense); fin del Camino de "
+                       "Santiago y puerta a las Rías Baixas.",
+        "notas": "Catedral, casco antiguo de piedra y ambiente peregrino. Marisco gallego "
+                 "a buen precio.",
+    },
+    {
+        "nombre": "Oviedo y Picos de Europa",
+        "region": "Asturias",
+        "transporte": "Tren/Alvia, vuelo o coche",
+        "coste_transporte": 60,
+        "coste_dia": 55,
+        "meses_ideales": [5, 6, 7, 8, 9],
+        "como_viajar": "Tren Alvia (~4h) o vuelo a Asturias; alquila coche para exprimir los "
+                       "Picos de Europa, los lagos de Covadonga y la costa.",
+        "notas": "Montaña verde, sidrerías y playas salvajes. El norte más auténtico y "
+                 "económico en verano.",
+    },
+    {
+        "nombre": "Palma de Mallorca",
+        "region": "Islas Baleares",
+        "transporte": "Vuelo (o ferry)",
+        "coste_transporte": 90,
+        "coste_dia": 65,
+        "meses_ideales": [5, 6, 9, 10],
+        "como_viajar": "Vuelo directo (~1h15); reserva con antelación y viaja en temporada "
+                       "media (may-jun, sep) para esquivar los precios de agosto.",
+        "notas": "Casco histórico, calas de la Serra de Tramuntana y ciclismo. Mucho más "
+                 "que fiesta.",
+    },
+    {
+        "nombre": "Ibiza",
+        "region": "Islas Baleares",
+        "transporte": "Vuelo (o ferry)",
+        "coste_transporte": 100,
+        "coste_dia": 80,
+        "meses_ideales": [5, 6, 9, 10],
+        "como_viajar": "Vuelo directo (~1h20); mayo-junio y septiembre son más baratos y "
+                       "tranquilos que el pico de julio-agosto.",
+        "notas": "Calas turquesas, Dalt Vila (Patrimonio de la Humanidad) y puestas de sol. "
+                 "También hay una Ibiza serena.",
+    },
+    {
+        "nombre": "Tenerife",
+        "region": "Islas Canarias",
+        "transporte": "Vuelo",
+        "coste_transporte": 120,
+        "coste_dia": 55,
+        "meses_ideales": [1, 2, 3, 4, 10, 11, 12],
+        "como_viajar": "Vuelo directo (~4h); clima de 'primavera eterna' todo el año, así "
+                       "que es el refugio de sol ideal en pleno invierno.",
+        "notas": "El Teide (pico más alto de España), pueblos coloniales y playas. Buen "
+                 "coste de vida para ser isla.",
+    },
+    {
+        "nombre": "Gran Canaria",
+        "region": "Islas Canarias",
+        "transporte": "Vuelo",
+        "coste_transporte": 120,
+        "coste_dia": 55,
+        "meses_ideales": [1, 2, 3, 4, 10, 11, 12],
+        "como_viajar": "Vuelo directo (~4h); como Tenerife, un destino de sol invernal "
+                       "difícil de batir dentro de España.",
+        "notas": "Dunas de Maspalomas, Las Palmas con playa urbana (Las Canteras) e "
+                 "interior montañoso. Un 'continente en miniatura'.",
+    },
+]

@@ -19,7 +19,7 @@ import os
 import html
 from datetime import datetime, timezone, timedelta, date
 
-from data.destinos import DESTINOS
+from data.destinos import DESTINOS, DESTINOS_ESPANA
 import flights
 
 ORIGEN = os.environ.get("ORIGEN_IATA", "MAD")
@@ -50,6 +50,13 @@ MULT_VUELO_MES = {
 MULT_DIA_MES = {
     1: 0.90, 2: 0.90, 3: 0.95, 4: 1.00, 5: 1.05, 6: 1.15,
     7: 1.30, 8: 1.35, 9: 1.05, 10: 0.95, 11: 0.90, 12: 1.10,
+}
+
+# Multiplicador del transporte NACIONAL (tren/bus/vuelo interno) según el mes.
+# Más estable que el vuelo internacional, con ligero repunte en verano y Navidad.
+MULT_TRANSPORTE_MES = {
+    1: 0.95, 2: 0.95, 3: 1.00, 4: 1.05, 5: 1.00, 6: 1.05,
+    7: 1.15, 8: 1.20, 9: 1.00, 10: 0.95, 11: 0.90, 12: 1.15,
 }
 
 # Eventos / descuentos recurrentes destacables por mes (texto informativo).
@@ -197,20 +204,23 @@ def coste_dia(dest: dict, mes: int) -> int:
     return round(dest["coste_dia"] * MULT_DIA_MES[mes])
 
 
-def presupuestos(dest: dict, mes: int) -> dict:
-    """Presupuesto total por persona = vuelo + (coste_dia * días)."""
-    vuelo = precio_vuelo(dest, mes)
+def coste_transporte(dest: dict, mes: int) -> int:
+    """Coste ida y vuelta del transporte nacional (España) para el mes."""
+    return round(dest["coste_transporte"] * MULT_TRANSPORTE_MES[mes])
+
+
+def presupuestos_desde(base: int, dest: dict, mes: int) -> dict:
+    """Presupuesto total por persona = base (vuelo/transporte) + coste_dia * días."""
     dia = coste_dia(dest, mes)
-    return {d: vuelo + dia * d for d in DURACIONES}
+    return {d: base + dia * d for d in DURACIONES}
 
 
-def puntuacion(dest: dict, mes: int) -> float:
+def puntuacion_desde(base: int, dest: dict, mes: int) -> float:
     """
-    Puntúa la relación calidad-precio para el mes. Menor coste total (vuelo +
-    7 días) => mejor. Si el mes está entre los 'meses_ideales' del destino,
-    aplicamos una bonificación por clima/temporada.
+    Relación calidad-precio del mes: menor coste (base + 7 días) => mejor. Si el
+    mes está entre los 'meses_ideales' del destino, bonificación por temporada.
     """
-    score = presupuestos(dest, mes)[7]
+    score = base + coste_dia(dest, mes) * 7
     if mes in dest["meses_ideales"]:
         score *= 0.82
     return score
@@ -220,78 +230,120 @@ def fmt_eur(valor: int) -> str:
     return f"{valor:,}".replace(",", ".") + " €"
 
 
-def render_seccion_mes(p: dict, abierto: bool) -> str:
-    """Devuelve el bloque <details> (acordeón) de un mes."""
-    mes, anio = p["mes"], p["anio"]
-    destinos = sorted(DESTINOS, key=lambda d: puntuacion(d, mes))
-    estacion = estacion_de(mes)
-    mes_nombre = MESES_ES[mes - 1].capitalize()
-    eventos = EVENTOS_MES.get(mes, [])
-    rango = f"{p['salida'].strftime('%d/%m/%Y')} – {p['regreso'].strftime('%d/%m/%Y')}"
-    mejor = destinos[0]
-
-    tarjetas = []
-    for i, d in enumerate(destinos, start=1):
-        presu = presupuestos(d, mes)
-        vuelo = precio_vuelo(d, mes)
-        dia = coste_dia(d, mes)
-        ideal = "✅ Temporada ideal" if mes in d["meses_ideales"] else "🟡 Temporada media/baja"
-        etiqueta_precio = "🟢 real" if es_precio_real(d, mes) else "≈ estimado"
-        filas = "".join(
-            f"<tr><td>{dias} días</td><td class='precio'>{fmt_eur(presu[dias])}</td></tr>"
-            for dias in DURACIONES
-        )
-        destacado = " destacado" if i <= 3 else ""
-        tarjetas.append(f"""
+def tarjeta(i: int, dest: dict, mes: int, estacion: str, base: int,
+            subtitulo: str, meta_lines: str) -> str:
+    """Renderiza una tarjeta de destino (común a Mundo y España)."""
+    presu = presupuestos_desde(base, dest, mes)
+    ideal = "✅ Temporada ideal" if mes in dest["meses_ideales"] else "🟡 Temporada media/baja"
+    filas = "".join(
+        f"<tr><td>{dias} días</td><td class='precio'>{fmt_eur(presu[dias])}</td></tr>"
+        for dias in DURACIONES
+    )
+    destacado = " destacado" if i <= 3 else ""
+    return f"""
         <article class="card{destacado}">
           <header>
             <span class="rank">#{i}</span>
-            <h3>{html.escape(d['nombre'])} <small>{html.escape(d['pais'])}</small></h3>
+            <h3>{html.escape(dest['nombre'])} <small>{html.escape(subtitulo)}</small></h3>
           </header>
           <p class="ideal">{ideal} · {html.escape(estacion)}</p>
-          <ul class="meta">
-            <li>✈️ <strong>Vuelo i/v:</strong> {fmt_eur(vuelo)} <span class="muted">({html.escape(d['aeropuertos'])}) · {etiqueta_precio}</span></li>
-            <li>🏷️ <strong>Más económico con:</strong> {html.escape(aerolinea_de(d, mes))}</li>
-            <li>💶 <strong>Gasto diario aprox.:</strong> {fmt_eur(dia)}/día · <span class="muted">Moneda: {html.escape(d['moneda'])}</span></li>
+          <ul class="meta">{meta_lines}
           </ul>
           <table class="presu">
             <thead><tr><th>Duración</th><th>Presupuesto total / persona</th></tr></thead>
             <tbody>{filas}</tbody>
           </table>
-          <p class="notas">{html.escape(d['notas'])}</p>
-        </article>""")
+          <p class="notas">{html.escape(dest['notas'])}</p>
+        </article>"""
 
-    top = destinos[:3]
-    top_items = "".join(
-        f"<li><strong>{html.escape(d['nombre'])}</strong> ({html.escape(d['pais'])}) — "
-        f"desde {fmt_eur(presupuestos(d, mes)[5])} por 5 días</li>"
+
+def _meta_mundo(d: dict, mes: int, base: int) -> str:
+    etiqueta = "🟢 real" if es_precio_real(d, mes) else "≈ estimado"
+    return (
+        f"""
+            <li>✈️ <strong>Vuelo i/v:</strong> {fmt_eur(base)} <span class="muted">({html.escape(d['aeropuertos'])}) · {etiqueta}</span></li>
+            <li>🏷️ <strong>Más económico con:</strong> {html.escape(aerolinea_de(d, mes))}</li>
+            <li>💶 <strong>Gasto diario aprox.:</strong> {fmt_eur(coste_dia(d, mes))}/día · <span class="muted">Moneda: {html.escape(d['moneda'])}</span></li>"""
+    )
+
+
+def _meta_espana(d: dict, mes: int, base: int) -> str:
+    return (
+        f"""
+            <li>🚄 <strong>Transporte i/v:</strong> {fmt_eur(base)} <span class="muted">({html.escape(d['transporte'])})</span></li>
+            <li>🧭 <strong>Cómo viajar mejor:</strong> {html.escape(d['como_viajar'])}</li>
+            <li>💶 <strong>Gasto diario aprox.:</strong> {fmt_eur(coste_dia(d, mes))}/día</li>"""
+    )
+
+
+def _subdivision(destinos, mes, estacion, base_fn, meta_fn, subtitulo_key):
+    """Ordena, arma tarjetas y top-3 de una subdivisión. Devuelve (tarjetas_html, top_html, mejor)."""
+    orden = sorted(destinos, key=lambda d: puntuacion_desde(base_fn(d, mes), d, mes))
+    tarjetas = []
+    for i, d in enumerate(orden, start=1):
+        base = base_fn(d, mes)
+        tarjetas.append(tarjeta(i, d, mes, estacion, base, d[subtitulo_key], meta_fn(d, mes, base)))
+    top = orden[:3]
+    top_html = "".join(
+        f"<li><strong>{html.escape(d['nombre'])}</strong> ({html.escape(d[subtitulo_key])}) — "
+        f"desde {fmt_eur(presupuestos_desde(base_fn(d, mes), d, mes)[5])} por 5 días</li>"
         for d in top
     )
+    return "".join(tarjetas), top_html, orden[0]
+
+
+def render_seccion_mes(p: dict, abierto: bool) -> str:
+    """Devuelve el bloque <details> (acordeón) de un mes, con Mundo + España."""
+    mes, anio = p["mes"], p["anio"]
+    estacion = estacion_de(mes)
+    mes_nombre = MESES_ES[mes - 1].capitalize()
+    eventos = EVENTOS_MES.get(mes, [])
+    rango = f"{p['salida'].strftime('%d/%m/%Y')} – {p['regreso'].strftime('%d/%m/%Y')}"
+
+    mundo_cards, mundo_top, mundo_mejor = _subdivision(
+        DESTINOS, mes, estacion, precio_vuelo, _meta_mundo, "pais")
+    esp_cards, esp_top, esp_mejor = _subdivision(
+        DESTINOS_ESPANA, mes, estacion, coste_transporte, _meta_espana, "region")
+
     eventos_items = "".join(f"<li>{html.escape(e)}</li>" for e in eventos)
     abierto_attr = " open" if abierto else ""
+    mejor_mundo_5 = presupuestos_desde(precio_vuelo(mundo_mejor, mes), mundo_mejor, mes)[5]
+    mejor_esp_5 = presupuestos_desde(coste_transporte(esp_mejor, mes), esp_mejor, mes)[5]
 
     return f"""
     <details class="mes"{abierto_attr}>
       <summary>
         <span class="mes-nombre">{mes_nombre} {anio}</span>
-        <span class="mes-meta">{html.escape(estacion)} · mejor opción: {html.escape(mejor['nombre'])} desde {fmt_eur(presupuestos(mejor, mes)[5])}/5 días</span>
+        <span class="mes-meta">{html.escape(estacion)} · 🌍 {html.escape(mundo_mejor['nombre'])} desde {fmt_eur(mejor_mundo_5)} · 🇪🇸 {html.escape(esp_mejor['nombre'])} desde {fmt_eur(mejor_esp_5)} (5 días)</span>
       </summary>
       <div class="mes-body">
         <p class="sub">Presupuestos por persona · fechas de referencia: {rango}</p>
-
-        <section class="panel top">
-          <h3>🏆 Mejores opciones de {mes_nombre} (calidad-precio)</h3>
-          <ul class="clean">{top_items}</ul>
-        </section>
 
         <section class="panel deals">
           <h3>🔔 Temporada y descuentos de {mes_nombre}</h3>
           <ul class="clean">{eventos_items}</ul>
         </section>
 
-        <h3 class="rank-title">📋 Ranking completo de destinos</h3>
-        <div class="grid">
-          {''.join(tarjetas)}
+        <div class="subdiv">
+          <h3 class="subdiv-title">🌍 Por el mundo</h3>
+          <section class="panel top">
+            <h4>🏆 Mejores opciones de {mes_nombre} (calidad-precio)</h4>
+            <ul class="clean">{mundo_top}</ul>
+          </section>
+          <div class="grid">
+            {mundo_cards}
+          </div>
+        </div>
+
+        <div class="subdiv espana">
+          <h3 class="subdiv-title">🇪🇸 Por España <small>· mismos criterios + cómo viajar mejor a cada sitio</small></h3>
+          <section class="panel top">
+            <h4>🏆 Mejores escapadas por España en {mes_nombre}</h4>
+            <ul class="clean">{esp_top}</ul>
+          </section>
+          <div class="grid">
+            {esp_cards}
+          </div>
         </div>
       </div>
     </details>"""
@@ -356,8 +408,13 @@ def render_pagina(base_date: date, hay_reales: bool) -> str:
   .panel h3 {{ margin-top:0; font-size:1.05rem; }}
   .panel.deals {{ border-color:var(--accent); }}
   .panel.top {{ border-color:var(--accent2); }}
+  .panel h4 {{ margin:0 0 .4em; font-size:1rem; }}
   ul.clean {{ margin:.2em 0; padding-left:1.2em; }}
   .rank-title {{ margin:14px 2px 8px; font-size:1.05rem; }}
+  .subdiv {{ margin-top:18px; padding-top:6px; border-top:2px solid var(--line); }}
+  .subdiv.espana {{ border-top-color:var(--accent); }}
+  .subdiv-title {{ margin:12px 2px 10px; font-size:1.25rem; }}
+  .subdiv-title small {{ color:var(--muted); font-weight:500; font-size:.62em; }}
   .grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }}
   .card {{ background:#0f1b30; border:1px solid var(--line); border-radius:14px; padding:16px 18px; }}
   .card.destacado {{ border-color:var(--accent2); box-shadow:0 0 0 1px var(--accent2) inset; }}
@@ -384,7 +441,7 @@ def render_pagina(base_date: date, hay_reales: bool) -> str:
   <header class="hero">
     <span class="badge">Planificación {desde} {periodos[0]['anio']} → {hasta}</span>
     <h1>Planificador de viajes por el mundo coste-efectivos desde España</h1>
-    <p class="sub">Los próximos {MESES_ADELANTE} meses, mes a mes · Presupuestos por persona para 5, 7, 10, 15 y 20 días · Última actualización: {actualizado}</p>
+    <p class="sub">Los próximos {MESES_ADELANTE} meses, mes a mes · Cada mes con 🌍 destinos por el mundo y 🇪🇸 escapadas por España · Presupuestos por persona para 5, 7, 10, 15 y 20 días · Última actualización: {actualizado}</p>
     <p class="sub">{fuente} · Origen: {html.escape(ORIGEN)}</p>
   </header>
 
@@ -400,8 +457,10 @@ def render_pagina(base_date: date, hay_reales: bool) -> str:
     (vuelo i/v más barato, 1 adulto, según las fechas de referencia de cada mes); los marcados como
     ≈ estimado son aproximaciones basadas en tarifas históricas de aerolíneas de bajo coste. El
     <strong>gasto diario</strong> (alojamiento + comidas + transporte + actividades) es siempre una
-    estimación por persona con perfil económico. Verifica el precio final en Skyscanner, Google
-    Flights o Kiwi antes de reservar.</p>
+    estimación por persona con perfil económico. En la subdivisión de <strong>España</strong>, el
+    <strong>transporte i/v</strong> (tren, autobús o vuelo interno) y el consejo de "cómo viajar
+    mejor" son orientativos: consulta Renfe, Ouigo, Iryo, ALSA o los buscadores de vuelos para el
+    precio final. Verifica siempre antes de reservar (Skyscanner, Google Flights o Kiwi).</p>
     <p>Esta página se regenera automáticamente el día 1 de cada mes, avanzando siempre la ventana de 12 meses.</p>
   </footer>
 </div>
